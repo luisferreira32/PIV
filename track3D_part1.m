@@ -9,7 +9,7 @@ size = length(imgseq1);
 
 %% 2. Now box objects moving
 
-image_objects = extract_objects(size, imgsrt, imgsd, imagewdepth);
+[image_objects, imglabel] = extract_objects(size, imgsrt, imgsd, imagewdepth);
 
 
 

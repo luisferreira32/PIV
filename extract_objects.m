@@ -1,4 +1,4 @@
-function [image_objects] = extract_objects(size, imgsrt, imgsd, imagewdepth)
+function [image_objects, imglabel] = extract_objects(size, imgsrt, imgsd, imagewdepth)
 
 % create labels' arrays
 imglabel = zeros(480, 640, size);
