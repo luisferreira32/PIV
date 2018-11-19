@@ -9,7 +9,7 @@ size = length(imgseq1);
 
 %% 2. Now box objects moving
 
-[image_objects, imglabel] = extract_objects(size, imgsrt, imgsd, imagewdepth);
+[image_objects, imglabel, imgnum] = extract_objects(size, imgsrt, imgsd, imagewdepth);
 
 
 
@@ -18,15 +18,8 @@ size = length(imgseq1);
 % connect boxes paths using proximity of boxes (and possible size)
 % then use colour from imgsrt, (lastly use features)
 
+objects = get_path(size, image_objects, imglabel, imgnum, imgsrt);
 
-
-%% 
-% just to test! assume all objects are different in all images
-for i = 1:size
-    for j = 1:imgnum(i)
-        % append?
-    end
-end
 
 end
 
