@@ -1,10 +1,10 @@
-function [imgsrt, imgsd, imagewdepth] = preliminary( imgseq1,   cam_params)
+function [ imgsrt, imgsd] = preliminary( imgseq1, cam_params)
 %% 1. Get our pointclounds ready
 
 % Make use of the arguments
 
-% load params
-load(cam_params)
+%cam params
+load(cam_params);
 %get names & create empty arrays
 jpg = "*.jpg";
 mat = "*.mat";
@@ -16,8 +16,7 @@ dd=dir(imgmat);
 imgs=zeros(480,640,3,length(d));
 imgsrt=zeros(480,640,3,length(d));
 imgsd=zeros(480,640,length(d));
-% empty image with depth
-imagewdepth.im = zeros(480,640,3,length(d));
+
 
 % Load information and compute digital RGB camera
 for i=1:length(d)
@@ -41,7 +40,6 @@ for i=1:length(d)
 	im1aux=reshape(im,[640*480 3]);
 	im2(indsclean,:)=im1aux(indscolor,:);
     aux=uint8(reshape(im2,[480,640,3]));
-    imagewdepth.im(:,:,:,i)=aux; 
     imgsrt(:,:,:,i)=aux;
     
     % finally save our depth array for further use
