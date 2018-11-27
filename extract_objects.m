@@ -1,4 +1,4 @@
-function [image_objects, image_pcs, imgnum] = extract_objects(film_length, imgsrt, imgsd, cam_params)
+function [image_objects, image_pcs] = extract_objects(film_length, imgsrt, imgsd, cam_params)
 
 % create labels' arrays
 imglabel = zeros(480, 640, film_length);
@@ -39,8 +39,7 @@ image_pcs(film_length) = struct();
 
 % this way we create a struct we can re-use to build the final objects
 for i = 1:film_length
-    % alloc for each image objects boxes and pcs
-    image_objects(i).object(imgnum(i)) = struct();
+    p = 1;
     for j = 1:imgnum(i)
         % check indexes for each label and compute 2d extremes
         [rows, columns] = find(imglabel(:,:,i) == j);
@@ -52,17 +51,20 @@ for i = 1:film_length
         
         % compute point cloud and store it for further use
         pc = get_object_pc(pixel_list, imgsrt(:,:,:,i), imgsd(:,:,i), cam_params);
-        image_pcs(i).object{j} = pc;
+        image_pcs(i).object{p} = pc;
         
         % THIS BOXING SHOULD BE WITH THE POINT CLOUD
         % X and Y are min and max of rows labelled
-        image_objects(i).object(j).X = [min(pixel_list(:,1)), min(pixel_list(:,1)), min(pixel_list(:,1)), min(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1))];
-        image_objects(i).object(j).Y = [max(pixel_list(:,2)), max(pixel_list(:,2)), min(pixel_list(:,2)), min(pixel_list(:,2)), max(pixel_list(:,2)), max(pixel_list(:,2)), min(pixel_list(:,2)), min(pixel_list(:,2))];
+        image_objects(i).object(p).X = [min(pixel_list(:,1)), min(pixel_list(:,1)), min(pixel_list(:,1)), min(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1))];
+        image_objects(i).object(p).Y = [max(pixel_list(:,2)), max(pixel_list(:,2)), min(pixel_list(:,2)), min(pixel_list(:,2)), max(pixel_list(:,2)), max(pixel_list(:,2)), min(pixel_list(:,2)), min(pixel_list(:,2))];
         % Z we check in the depth image within object label
         zsmall = min(imgsd(min(pixel_list(:,1)):max(pixel_list(:,1)),min(pixel_list(:,2)):max(pixel_list(:,2)),i));
         zbig = max(imgsd(min(pixel_list(:,1)):max(pixel_list(:,1)),min(pixel_list(:,2)):max(pixel_list(:,2)),i));
-        image_objects(i).object(j).Z = [zbig, zsmall, zsmall, zbig, zbig, zsmall, zsmall, zbig];
-        image_objects(i).object(j).frames_tracked = i;
+        image_objects(i).object(p).Z = [zbig, zsmall, zsmall, zbig, zbig, zsmall, zsmall, zbig];
+        image_objects(i).object(p).frames_tracked = i;
+        
+        % next object
+        p = p +1;
     end
 end
 

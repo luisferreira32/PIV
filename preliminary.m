@@ -1,4 +1,4 @@
-function [ imgsrt, imgsd] = preliminary( imgseq1, cam_params)
+function [film_length, imgsrt, imgsd] = preliminary( imgseq1, cam_params)
 %% 1. Get our pointclounds ready
 
 % Make use of the arguments
@@ -12,11 +12,12 @@ imgjpg = strcat(imgseq1, jpg);
 imgmat = strcat(imgseq1, mat);
 d=dir(imgjpg);
 dd=dir(imgmat);
+%
+film_length = length(d);
 % empty images rgb, rgb R & T, depth
 imgs=zeros(480,640,3,length(d));
 imgsrt=zeros(480,640,3,length(d));
 imgsd=zeros(480,640,length(d));
-
 
 % Load information and compute digital RGB camera
 for i=1:length(d)
