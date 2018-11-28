@@ -13,17 +13,19 @@ treshold = 500;
 % allocate memory before
 costs(film_length) = struct();
 objects(length(image_objects(1))) = struct();
-object_num = [];
+
+% to keep tracking of the objects
+object_index = zeros(length(image_objects(1)));
 total_objs = 0;
 
 % first "wave" of objects, no matching yet
 for i = 1:length(image_objects(1))
-    object_num = [object_num, total_objs+1];
+    object_index(i) = total_objs+1;
     total_objs = total_objs+1;
-    objects(object_num(i)).X = [image_objects(1).object(object_num(i)).X];
-    objects(object_num(i)).Y = [image_objects(1).object(object_num(i)).Y];
-    objects(object_num(i)).Z = [image_objects(1).object(object_num(i)).Z];
-    objects(object_num(i)).frames_tracked = [image_objects(1).object(object_num(i))).frames_tracked];
+    objects(object_index(i)).X = [image_objects(1).object(object_index(i)).X];
+    objects(object_index(i)).Y = [image_objects(1).object(object_index(i)).Y];
+    objects(object_index(i)).Z = [image_objects(1).object(object_index(i)).Z];
+    objects(object_index(i)).frames_tracked = [image_objects(1).object(object_index(i))).frames_tracked];
 end
 
 % for each image calculate cost table
@@ -45,47 +47,34 @@ for i=1:(film_length-1)
     end
     
     % Assign with greedy algorithm
-    match_object = ones(length(image_objects(i)))*(treshold + 1);
-    index_object = ones(length(image_objects(i)))*(-1);
-    for n = 1:length(image_objects(i))
-        for m = 1:length(image_objects(i+1))
-            if match_object(n) > costs(i).table(n,m) && costs(i).table(n,m) < treshold
-                match_object(n) = costs(i).table(n,m);
-                index_object(n) = m;
-            end
-        end
-    end
-    for m = 1:length(image_objects(i+1))
-        % check which of the columns is the lowest value and make all
-        % others impossible
-        aux = treshold+1;
-        index = find(index_object == m);
-        for n = 1:length(index)
-            if match_object(index(n)) < aux
-                aux = match_object(index(n));
-            else
-                match_object(index(n)) = treshold +1;
-            end
-        end
-    end
-    
+    [match_object, index_object] = greedy(costs(i).table, length(image_objects(i)),length(image_objects(i+1)), treshold)
+   
     % and make the final object struct
-    % IT IS WRONG: CHECK OBJECT_NUM, IF ONE FIGURE AS MORE OBJECTS OR LESS
-    % THAN THE OTHER, AND ACT ACCORDINGLY!!
-    for n = 1:length(image_objects(i))
-        % if there was a match, it's the same object
-        if match_object(n) < treshold
-            objects(object_num(n)).X = [objects(object_num(n)).X;image_objects(i+1).object(index_object(n)).X];
-            objects(object_num(n)).Y = [objects(object_num(n)).Y;image_objects(i+1).object(index_object(n)).Y];
-            objects(object_num(n)).Z = [objects(object_num(n)).Z;image_objects(i+1).object(index_object(n)).Z];
-            objects(object_num(n)).frames_tracked = [objects(object_num(n)).frames_tracked, image_objects(i+1).object(index_object(n)).frames_tracked];
-        % if there wasn't, new object!
-        else
-            object_num(n) = total_objs + 1;
-            total_objs = total_objs + 1;
-        end
+    for m = 1:length(image_objects(i+1))
+		object_index_aux = zeros(length(image_objects(i+1)));
+    	% if there was a match
+		if index_object(m) > 0
+			% track object
+            objects(object_index(index_object(m))).X = [objects(object_index(index_object(m))).X;image_objects(i+1).object(index_object(m)).X];
+            objects(object_index(index_object(m))).Y = [objects(object_index(index_object(m))).Y;image_objects(i+1).object(index_object(m)).Y];
+            objects(object_index(index_object(m))).Z = [objects(object_index(index_object(m))).Z;image_objects(i+1).object(index_object(m)).Z];
+            objects(object_index(index_object(m))).frames_tracked = [objects(object_index(index_object(m))).frames_tracked, image_objects(i+1).object(index_object(m)).frames_tracked];
+            % register for next iteration
+            object_index_aux(m) = object_index(index_object(m));
+		else
+			% create new object
+    		total_objs = total_objs+1;
+            objects(total_objs).X = [image_objects(i+1).object(index_object(m)).X];
+            objects(total_objs).Y = [image_objects(i+1).object(index_object(m)).Y];
+            objects(total_objs).Z = [image_objects(i+1).object(index_object(m)).Z];
+            objects(total_objs).frames_tracked = [image_objects(i+1).object(index_object(m)).frames_tracked];
+            % register for next iteration
+			object_index_aux(m) = total_objs;
+		end 
     end
-    
+    % this is the list of objects existant in the next frame
+    object_index = object_index_aux;
+
 end
 
 
