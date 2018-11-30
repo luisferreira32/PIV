@@ -51,16 +51,18 @@ for i = 1:film_length
         
         % compute point cloud and store it for further use
         pc = get_object_pc(pixel_list, imgsrt(:,:,:,i), imgsd(:,:,i), cam_params);
+        % get values from point cloud
+        [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc);
+        
         image_pcs(i).object{p} = pc;
         
-        % get values from point cloud
-        [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc)
         % set up the final object struct
         image_objects(i).object(p).X = [xmin, xmin, xmin, xmin, xmax, xmax, xmax, xmax];
         image_objects(i).object(p).Y = [ymax, ymax, ymin, ymin, ymax, ymax, ymin, ymin];
         image_objects(i).object(p).Z = [zmax, zmin, zmin, zmax, zmax, zmin, zmin, zmax];
         image_objects(i).object(p).frames_tracked = i;
         
+        %figure(1);showPointCloud(pc);
         % next object
         p = p +1;
     end

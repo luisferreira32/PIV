@@ -7,7 +7,7 @@ function [objects] = get_path(film_length, image_objects, image_pcs)
 Pconst = 1;
 Vconst = 1;
 Cconst = 1;
-treshold = 500;
+treshold = 10000;
 
 
 % allocate memory before
@@ -25,7 +25,7 @@ for i = 1:length(image_objects(1))
     objects(object_index(i)).X = [image_objects(1).object(object_index(i)).X];
     objects(object_index(i)).Y = [image_objects(1).object(object_index(i)).Y];
     objects(object_index(i)).Z = [image_objects(1).object(object_index(i)).Z];
-    objects(object_index(i)).frames_tracked = [image_objects(1).object(object_index(i))).frames_tracked];
+    objects(object_index(i)).frames_tracked = [image_objects(1).object(object_index(i)).frames_tracked];
 end
 
 % for each image calculate cost table
@@ -45,10 +45,10 @@ for i=1:(film_length-1)
             costs(i).table(n,m) = costs(i).table(n,m) + Cconst * cost_colour(image_pcs(i).object{n}, image_pcs(i+1).object{m});
         end
     end
-    
+        
     % Assign with greedy algorithm
-    [match_object, index_object] = greedy(costs(i).table, length(image_objects(i)),length(image_objects(i+1)), treshold)
-   
+    [index_object] = greedy(costs(i).table, length(image_objects(i)),length(image_objects(i+1)), treshold);
+   index_object
     % and make the final object struct
     for m = 1:length(image_objects(i+1))
 		object_index_aux = zeros(length(image_objects(i+1)));
@@ -64,10 +64,10 @@ for i=1:(film_length-1)
 		else
 			% create new object
     		total_objs = total_objs+1;
-            objects(total_objs).X = [image_objects(i+1).object(index_object(m)).X];
-            objects(total_objs).Y = [image_objects(i+1).object(index_object(m)).Y];
-            objects(total_objs).Z = [image_objects(i+1).object(index_object(m)).Z];
-            objects(total_objs).frames_tracked = [image_objects(i+1).object(index_object(m)).frames_tracked];
+            objects(total_objs).X = [image_objects(i+1).object(m).X];
+            objects(total_objs).Y = [image_objects(i+1).object(m).Y];
+            objects(total_objs).Z = [image_objects(i+1).object(m).Z];
+            objects(total_objs).frames_tracked = [image_objects(i+1).object(m).frames_tracked];
             % register for next iteration
 			object_index_aux(m) = total_objs;
 		end 

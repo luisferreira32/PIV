@@ -4,12 +4,11 @@ function [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc)
 % Output:
 % boxpoints: vector with the points that form the bounding boz around the
 % object in the point cloud 
-
-xmin=min(pc(:,1));
-xmax=max(pc(:,1));
-ymin=min(pc(:,2));
-ymax=max(pc(:,2));
-zmin=min(pc(:,3));
-zmax=max(pc(:,3));
+xmin=min(pc.Location(:,1));
+xmax=max(pc.Location(:,1));
+ymin=min(pc.Location(:,2));
+ymax=max(pc.Location(:,2));
+zmin=min(pc.Location(:,3));
+zmax=max(pc.Location(:,3));
 
 end
