@@ -48,7 +48,7 @@ for i=1:(film_length-1)
         
     % Assign with greedy algorithm
     [index_object] = greedy(costs(i).table, length(image_objects(i)),length(image_objects(i+1)), treshold);
-   index_object
+   
     % and make the final object struct
     for m = 1:length(image_objects(i+1))
 		object_index_aux = zeros(length(image_objects(i+1)));
