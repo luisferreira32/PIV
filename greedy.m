@@ -1,8 +1,8 @@
 function [index_object] = greedy(cost_table, num_n, num_m, treshold)
 	% allocate memory
-	match_object = ones(num_n)*(treshold + 1);
-	index_cost = ones(num_n)*(-1);
-    index_object = ones(num_m)*(-1);
+	match_object = ones(1,num_n)*(treshold + 1);
+	index_cost = ones(1,num_n)*(-1);
+    index_object = ones(1,num_m)*(-1);
 
     % for the minimum in each origin object
     for n = 1:num_n

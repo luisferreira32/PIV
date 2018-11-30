@@ -11,6 +11,10 @@ bgdepth=median(imgsd,3);
 %figure(3);
 %imagesc(bgdepth);   
 
+% pre alocate structs
+image_objects(film_length) = struct();
+image_pcs(film_length) = struct();
+
 % use the depth image to check objects moving (the best)
 for i=1:film_length
     % subtract background
@@ -20,8 +24,6 @@ for i=1:film_length
     
     % label every object
     [L, num]=bwlabel(imgdiffiltered);
-    imglabel(:,:,i) = L;
-    imgnum(i) = num;
         
     % show results (to be commented)
     %figure(4);
@@ -30,19 +32,12 @@ for i=1:film_length
     %figure(5);
     %imagesc(bwlabel(imgdiffiltered));
     %pause(0.01);
-end
-
-
-% box each object on each image
-image_objects(film_length) = struct();
-image_pcs(film_length) = struct();
-
-% this way we create a struct we can re-use to build the final objects
-for i = 1:film_length
+    
+    % then box it
     p = 1;
-    for j = 1:imgnum(i)
+    for j = 1:num
         % check indexes for each label and compute 2d extremes
-        [rows, columns] = find(imglabel(:,:,i) == j);
+        [rows, columns] = find(L == j);
         pixel_list = [rows, columns];
         % check if area is at least 500 pixels
         if length(pixel_list(:,1)) < 500

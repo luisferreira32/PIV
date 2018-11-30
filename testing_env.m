@@ -1,4 +1,4 @@
-imgseq1 = "datasets/um/images";
+imgseq1 = "datasets/confusao/images";
 cam_params_str = "cameraparametersAsus.mat";
 
 objects = track3D_part1(imgseq1,cam_params_str);
@@ -9,6 +9,7 @@ Kd = cam_params.Kdepth;
 for i = 1:length(objects)
     figure(i)
 	for  k = 1:length(objects(i).frames_tracked)
+        clf;
         [v, u]=ind2sub([480 640],(1:480*640));
         depth_array = imdepth(:,:,objects(i).frames_tracked(k));
         Z=double((depth_array(:))');
@@ -17,7 +18,10 @@ for i = 1:length(objects)
         showPointCloud(pc);
         hold on
 		plot3(objects(i).X(k,:), objects(i).Y(k,:), objects(i).Z(k,:))
-		pause(.5)
-        clf;
-	end
+        pause(0.01);
+    end
+    % for now just show the first X objects
+    if i > 1
+        break;
+    end
 end

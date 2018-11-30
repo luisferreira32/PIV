@@ -22,7 +22,7 @@ for i=1:length(pixel_list)
     depth_index(i)=imgdepth(pixel_list(i,1),pixel_list(i,2));
 end
 
-Z=depth_index(:)';
+Z=double(depth_index(:)');
 u=pixel_list(:,2)';
 v=pixel_list(:,1)';
 P=inv(cam_params.Kdepth)*[Z.*u ;Z.*v;Z];
