@@ -1,7 +1,5 @@
 function [film_length, imgsrt, imgsd] = preliminary( imgseq1, cam_params)
-%% 1. Get our pointclounds ready
-
-% Make use of the arguments
+% Get information in this function, treat it to have an RGB image rotated + translated (imgsrt) and return to further use
 
 %cam params
 load(cam_params);
