@@ -18,6 +18,7 @@ function [objects] = track3D_part1( imgseq1,   cam_params)
 
 objects = get_path(film_length, image_objects, image_pcs);
 
+% test it graphically?
 
 end
 
