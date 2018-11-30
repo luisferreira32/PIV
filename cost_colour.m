@@ -25,5 +25,6 @@ function [cost] = cost_colour(pc1, pc2)
         h2=h2/size(hsv2,1)/size(hsv2,2);
     end
 
+    % returns a cost between 0 and 1?
     cost = pdist2(h1',h2');
 end
