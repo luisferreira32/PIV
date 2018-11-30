@@ -1,35 +1,80 @@
-function [objects] = get_path(size, image_objects, imglabel,imgnum, imgsrt)
+function [objects] = get_path(film_length, image_objects, image_pcs)
 % to get the path we must choose the minimum (acceptable) cost between two
 % objects in two diferent pictures. cost function f = A*proximity + B*color
 
 % change this scalers to get better cost
 % proximity of vertices
-A = [1,1,1,1,1,1,1,1];
-B = 1;
-threshold = 500;
+Pconst = 1;
+Vconst = 1;
+Cconst = 1;
+treshold = 500;
 
 
-% declare cost tables struct
-costs(size) = struct();
+% allocate memory before
+costs(film_length) = struct();
+objects(length(image_objects(1))) = struct();
+
+% to keep tracking of the objects
+object_index = zeros(length(image_objects(1)));
+total_objs = 0;
+
+% first "wave" of objects, no matching yet
+for i = 1:length(image_objects(1))
+    object_index(i) = total_objs+1;
+    total_objs = total_objs+1;
+    objects(object_index(i)).X = [image_objects(1).object(object_index(i)).X];
+    objects(object_index(i)).Y = [image_objects(1).object(object_index(i)).Y];
+    objects(object_index(i)).Z = [image_objects(1).object(object_index(i)).Z];
+    objects(object_index(i)).frames_tracked = [image_objects(1).object(object_index(i))).frames_tracked];
+end
 
 % for each image calculate cost table
-for i=1:(size-1)
-    % start all with an impossible cost (undefined)
-    costs(i).table = ones(imgnum(i),imgnum(i+1))*(-1);
+for i=1:(film_length-1)
+    % start all with an impossible cost
+    costs(i).table = ones(length(image_objects(i)),length(image_objects(i+1)))*(treshold+1);
     
     % for each pair define a cost
-    for n = 1:imgnum(i)
-        for m = 1:imgnum(i+1)
-            % distance, note that if we use imgwdepth we could convert back
-            % to meters and get a better understanding of distances, here
-            % it's simplified as pixels distance
-            costs(i).table(n,m) = cost_proximity(image_objects(i).object(n), image_objects(i+1).object(m), A);
+    for n = 1:length(image_objects(i))
+        for m = 1:length(image_objects(i+1))
+            % proximity cost is distance:
+            costs(i).table(n,m) = Pconst * cost_proximity(image_objects(i).object(n), image_objects(i+1).object(m));
+            % we can have a volume cost
+            %costs(i).table(n,m) = costs(i).table(n,m); % + Vconst * cost_volume(pc1, pc2);
             
             % the colour cost should be done with hue and/or saturation
-            costs(i).table(n,m) = costs(i).table(n,m); % + cost_color(imgrt(i), imgrt(i+1), imglabel(i), imglabel(i+1), B)
+            costs(i).table(n,m) = costs(i).table(n,m) + Cconst * cost_colour(image_pcs(i).object{n}, image_pcs(i+1).object{m});
         end
     end
     
+    % Assign with greedy algorithm
+    [match_object, index_object] = greedy(costs(i).table, length(image_objects(i)),length(image_objects(i+1)), treshold)
+   
+    % and make the final object struct
+    for m = 1:length(image_objects(i+1))
+		object_index_aux = zeros(length(image_objects(i+1)));
+    	% if there was a match
+		if index_object(m) > 0
+			% track object
+            objects(object_index(index_object(m))).X = [objects(object_index(index_object(m))).X;image_objects(i+1).object(index_object(m)).X];
+            objects(object_index(index_object(m))).Y = [objects(object_index(index_object(m))).Y;image_objects(i+1).object(index_object(m)).Y];
+            objects(object_index(index_object(m))).Z = [objects(object_index(index_object(m))).Z;image_objects(i+1).object(index_object(m)).Z];
+            objects(object_index(index_object(m))).frames_tracked = [objects(object_index(index_object(m))).frames_tracked, image_objects(i+1).object(index_object(m)).frames_tracked];
+            % register for next iteration
+            object_index_aux(m) = object_index(index_object(m));
+		else
+			% create new object
+    		total_objs = total_objs+1;
+            objects(total_objs).X = [image_objects(i+1).object(index_object(m)).X];
+            objects(total_objs).Y = [image_objects(i+1).object(index_object(m)).Y];
+            objects(total_objs).Z = [image_objects(i+1).object(index_object(m)).Z];
+            objects(total_objs).frames_tracked = [image_objects(i+1).object(index_object(m)).frames_tracked];
+            % register for next iteration
+			object_index_aux(m) = total_objs;
+		end 
+    end
+    % this is the list of objects existant in the next frame
+    object_index = object_index_aux;
+
 end
 
 
