@@ -1,4 +1,4 @@
-function [match_object, index_object] = greedy(cost_table, num_n, num_m, treshold)
+function [index_object] = greedy(cost_table, num_n, num_m, treshold)
 	% allocate memory
 	match_object = ones(num_n)*(treshold + 1);
 	index_cost = ones(num_n)*(-1);
@@ -18,13 +18,19 @@ function [match_object, index_object] = greedy(cost_table, num_n, num_m, treshol
     % check which of the columns is the lowest value
     for m = 1:num_m
         index = find(index_cost == m);
-        for p = 1:(length(index)-1)
-        	if match_object(index(p)) < match_object(index(p+1))
-        		match_object(index(p+1)) = match_object(index(p));
-        		index_object(m) = index(p+1);
-        	else
-        		index_object(m) = index(p);
-        	end  
+        % if there is only one value, it is it
+        if length(index) == 1
+            index_object(m) = index;
+        else
+            % if there are multiple, select the lowest
+            for p = 1:(length(index)-1)
+                if match_object(index(p)) < match_object(index(p+1))
+                    match_object(index(p+1)) = match_object(index(p));
+                    index_object(m) = index(p+1);
+                else
+                    index_object(m) = index(p);
+                end  
+            end
         end
     end
 end
