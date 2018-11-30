@@ -53,14 +53,12 @@ for i = 1:film_length
         pc = get_object_pc(pixel_list, imgsrt(:,:,:,i), imgsd(:,:,i), cam_params);
         image_pcs(i).object{p} = pc;
         
-        % THIS BOXING SHOULD BE WITH THE POINT CLOUD
-        % X and Y are min and max of rows labelled
-        image_objects(i).object(p).X = [min(pixel_list(:,1)), min(pixel_list(:,1)), min(pixel_list(:,1)), min(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1)), max(pixel_list(:,1))];
-        image_objects(i).object(p).Y = [max(pixel_list(:,2)), max(pixel_list(:,2)), min(pixel_list(:,2)), min(pixel_list(:,2)), max(pixel_list(:,2)), max(pixel_list(:,2)), min(pixel_list(:,2)), min(pixel_list(:,2))];
-        % Z we check in the depth image within object label
-        zsmall = min(imgsd(min(pixel_list(:,1)):max(pixel_list(:,1)),min(pixel_list(:,2)):max(pixel_list(:,2)),i));
-        zbig = max(imgsd(min(pixel_list(:,1)):max(pixel_list(:,1)),min(pixel_list(:,2)):max(pixel_list(:,2)),i));
-        image_objects(i).object(p).Z = [zbig, zsmall, zsmall, zbig, zbig, zsmall, zsmall, zbig];
+        % get values from point cloud
+        [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc)
+        % set up the final object struct
+        image_objects(i).object(p).X = [xmin, xmin, xmin, xmin, xmax, xmax, xmax, xmax];
+        image_objects(i).object(p).Y = [ymax, ymax, ymin, ymin, ymax, ymax, ymin, ymin];
+        image_objects(i).object(p).Z = [zmax, zmin, zmin, zmax, zmax, zmin, zmin, zmax];
         image_objects(i).object(p).frames_tracked = i;
         
         % next object
