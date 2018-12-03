@@ -20,7 +20,7 @@ for i=1:film_length
     % subtract background
     imdiff=abs(imgsd(:,:,i)-bgdepth)>.20;
     % filter image, maybe another filter to get better objects?
-    imgdiffiltered=imopen(imdiff,strel('disk',7));
+    imgdiffiltered=imopen(imdiff,strel('disk',6));
     
     % label every object
     [L, num]=bwlabel(imgdiffiltered);
@@ -39,8 +39,8 @@ for i=1:film_length
         % check indexes for each label and compute 2d extremes
         [rows, columns] = find(L == j);
         pixel_list = [rows, columns];
-        % check if area is at least 500 pixels
-        if length(pixel_list(:,1)) < 500
+        % check if area is at least 1000 pixels
+        if length(pixel_list(:,1)) < 1000
             continue
         end
         

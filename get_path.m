@@ -7,7 +7,7 @@ function [objects] = get_path(film_length, image_objects, image_pcs)
 Pconst = 1;
 Vconst = 1;
 Cconst = 1;
-treshold = 100;
+treshold = 10000;
 
 
 % allocate memory before
@@ -45,7 +45,7 @@ for i=1:(film_length-1)
             costs(i).table(n,m) = costs(i).table(n,m) + Cconst * cost_colour(image_pcs(i).object{n}, image_pcs(i+1).object{m});
         end
     end
-        
+      
     % Assign with greedy algorithm
     [index_object] = greedy(costs(i).table, length(image_objects(i).object),length(image_objects(i+1).object), treshold);
         

@@ -1,5 +1,5 @@
 clear;
-imgseq1_str = "datasets/confusao/images";
+imgseq1_str = "datasets/um/images";
 load("cameraparametersAsus.mat")
 
 % do structs
