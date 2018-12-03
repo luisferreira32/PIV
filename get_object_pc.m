@@ -7,7 +7,6 @@ function [pc]=get_object_pc(pixel_list, imgrgb,imgdepth, cam_params)
 % Outputs:
 % pc - point cloud obtained from the depth and rgb image
 
-load(cam_params);
 rgb_index=zeros(length(pixel_list),3);
 depth_index=zeros(length(pixel_list),1);
 

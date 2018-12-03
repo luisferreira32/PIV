@@ -20,7 +20,7 @@ for i=1:film_length
     % subtract background
     imdiff=abs(imgsd(:,:,i)-bgdepth)>.20;
     % filter image, maybe another filter to get better objects?
-    imgdiffiltered=imopen(imdiff,strel('disk',6));
+    imgdiffiltered=imopen(imdiff,strel('disk',7));
     
     % label every object
     [L, num]=bwlabel(imgdiffiltered);

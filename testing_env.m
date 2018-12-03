@@ -1,9 +1,25 @@
-imgseq1 = "datasets/confusao/images";
-cam_params_str = "cameraparametersAsus.mat";
+clear;
+imgseq1_str = "datasets/confusao/images";
+load("cameraparametersAsus.mat")
 
-objects = track3D_part1(imgseq1,cam_params_str);
-[fl, imgs, imdepth] = preliminary(imgseq1, cam_params_str);
-load(cam_params_str);
+% do structs
+% load all the jpg and mat
+jpg = "*.jpg";
+mat = "*.mat";
+imgjpg = strcat(imgseq1_str, jpg);
+imgmat = strcat(imgseq1_str, mat);
+d=dir(imgjpg);
+dd=dir(imgmat);
+% pass it to a struct
+imgseq1(length(d)) = struct();
+for i = 1:length(d)
+    imgseq1(i).rgb = fullfile(d(i).folder,d(i).name);
+    imgseq1(i).depth = fullfile(dd(i).folder,dd(i).name);
+end
+%%
+objects = track3D_part1(imgseq1,cam_params);
+[fl, imgs, imdepth] = loader(imgseq1, cam_params);
+
 Kd = cam_params.Kdepth;
 %%
 for i = 1:length(objects)

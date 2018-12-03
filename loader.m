@@ -1,15 +1,15 @@
-function [ imgsrt, imgsd] = loader( imgseq1, cam_params)
+function [fl, imgsrt, imgsd] = loader( imgseq1, cam_params)
 %% 1. Get our pointclounds ready
 
 % Make use of the arguments
-
-%cam params
-load(cam_params);
 
 % empty images rgb, rgb R & T, depth
 imgs=zeros(480,640,3,length(imgseq1));
 imgsrt=zeros(480,640,3,length(imgseq1));
 imgsd=zeros(480,640,length(imgseq1));
+
+% film length
+fl = length(imgseq1);
 
 % Load information and compute digital RGB camera
 for i=1:length(imgseq1)

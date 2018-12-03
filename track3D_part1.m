@@ -2,7 +2,7 @@ function [objects] = track3D_part1( imgseq1,   cam_params)
 %% 1. Get our data ready
 
 %for test use preliminary and imgseq is dir name, for project use loader
-[film_length, imgsrt, imgsd]=preliminary(imgseq1, cam_params);
+[film_length, imgsrt, imgsd]=loader(imgseq1, cam_params);
 %[imgsrt, imgsd]=loader(imgseq1, cam_params);
 % film_length = length(imgseq1);
 log = "done loading"
