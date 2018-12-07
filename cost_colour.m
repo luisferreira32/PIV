@@ -1,10 +1,20 @@
-function [cost] = cost_colour(pc1, pc2)
+function [cost] = cost_colour(pl1, pl2, img)
     % a cost of colour is histogram diference! let's try it
+    % alocate
+    o1 = zeros(length(pl1), 3);
+    o2 = zeros(length(pl2), 3);
+    % first get each object out of the image
+    for i=1:length(pl1)
+        o1(i,:)=img(pl1(i,1),pl1(i,2),:);
+    end
+    for i=1:length(pl2)
+    	o2(i,:)=img(pl2(i,1),pl2(i,2),:);
+    end
   
     % swap from rgb to hsv
     % this is a cost with the colours having two object rgb pixels.
-    hsv1 = rgb2hsv(double(pc1.Color)./255);
-    hsv2 = rgb2hsv(double(pc2.Color)./255);
+    hsv1 = rgb2hsv(double(o1)./255);
+    hsv2 = rgb2hsv(double(o2)./255);
  
     % if saturation is too little we must ignore hue and do with saturation
     linind1 = find(hsv1(:,2)<.05);

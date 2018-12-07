@@ -1,4 +1,4 @@
-function [objects] = get_path(film_length, image_objects, image_pcs)
+function [objects] = get_path(film_length, image_objects, imgsrt)
 % to get the path we must choose the minimum (acceptable) cost between two
 % objects in two diferent pictures. cost function f = A*proximity + B*color
 
@@ -42,7 +42,7 @@ for i=1:(film_length-1)
             %costs(i).table(n,m) = costs(i).table(n,m); % + Vconst * cost_volume(pc1, pc2);
             
             % the colour cost should be done with hue and/or saturation
-            costs(i).table(n,m) = costs(i).table(n,m) + Cconst * cost_colour(image_pcs(i).object{n}, image_pcs(i+1).object{m});
+            costs(i).table(n,m) = costs(i).table(n,m) + Cconst * cost_colour(image_objects(i).object(n).pixel_list, image_objects(i+1).object(m).pixel_list, imgsrt(:,:,:,i));
         end
     end
       
