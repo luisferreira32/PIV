@@ -39,7 +39,7 @@ for i=1:film_length
             continue
         end
         
-        % get values from point cloud
+        % get values from depth
         [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(imgsd(:,:,i), pixel_list);
                
         % set up the final object struct

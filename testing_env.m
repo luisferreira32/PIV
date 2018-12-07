@@ -27,6 +27,7 @@ for i = 1:length(objects)
         clf;
         imshow(uint8(imgs(:,:,:,objects(i).frames_tracked(k))));
         hold on
+		%plot3(objects(i).X(k,:), objects(i).Y(k,:), objects(i).Z(k,:))
 		plot(objects(i).X(k,:), objects(i).Y(k,:))
         pause(0.01);
     end
