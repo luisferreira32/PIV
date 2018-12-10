@@ -19,9 +19,13 @@ for i=1:film_length
     
     % label every object
     [L, num]=bwlabel(imgdiffiltered);
+    % check with gradients between overlapping objects
+    [Gmag, ~] = imgradient(imgsd(:,:,i));
+    lin_indexes = Gmag > 1;
+    imgdiffiltered(lin_indexes) = 0;
         
     % DEBUG
-    %imagesc(imgsd(:,:,i))
+    imagesc(imgsd(:,:,i))
     
     % then box it
     p = 1;
@@ -47,15 +51,15 @@ for i=1:film_length
         image_objects(i).object(p).pixel_list = pixel_list;
         
         %DEBUG
-        %hold on
-        %plot(image_objects(i).object(p).X, image_objects(i).object(p).Y)
+        hold on
+        plot(image_objects(i).object(p).X, image_objects(i).object(p).Y)
         
         % next object
         p = p +1;
     end
     %DEBUG
-    %pause(0.1)
-    %hold off
+    pause(0.1)
+    hold off
 end
 
 end
