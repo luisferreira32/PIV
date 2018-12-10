@@ -20,13 +20,8 @@ for i=1:film_length
     % label every object
     [L, num]=bwlabel(imgdiffiltered);
         
-    % show results (to be commented)
-    %figure(4);
-    %imagesc(imgdiffiltered);
-    %colormap(gray);
-    %figure(5);
-    %imagesc(bwlabel(imgdiffiltered));
-    %pause(0.01);
+    % DEBUG
+    %imagesc(imgsd(:,:,i))
     
     % then box it
     p = 1;
@@ -50,9 +45,17 @@ for i=1:film_length
         
         %and add the pixel list!
         image_objects(i).object(p).pixel_list = pixel_list;
+        
+        %DEBUG
+        %hold on
+        %plot(image_objects(i).object(p).X, image_objects(i).object(p).Y)
+        
         % next object
         p = p +1;
     end
+    %DEBUG
+    %pause(0.1)
+    %hold off
 end
 
 end
