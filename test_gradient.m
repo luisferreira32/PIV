@@ -1,29 +1,45 @@
-function [image_objects] = extract_objects(film_length, imgsd)
+%% SETTING UP THE STUFF
+clear;
+imgseq1_str = "datasets/um/images";
+load("cameraparametersAsus.mat")
 
-% find the background with median ON DEPTH
+% do structs
+% load all the jpg and mat
+jpg = "*.jpg";
+mat = "*.mat";
+imgjpg = strcat(imgseq1_str, jpg);
+imgmat = strcat(imgseq1_str, mat);
+d=dir(imgjpg);
+dd=dir(imgmat);
+% pass it to a struct
+imgseq1(length(d)) = struct();
+for i = 1:length(d)
+    imgseq1(i).rgb = fullfile(d(i).folder,d(i).name);
+    imgseq1(i).depth = fullfile(dd(i).folder,dd(i).name);
+end
+[fl, imgs, imgsd] = loader(imgseq1, cam_params);
 bgdepth=median(imgsd,3);
 
-% show results, to be commented
-%figure(3);
-%imagesc(bgdepth);   
-
-% pre alocate structs
-image_objects(film_length) = struct();
-
-% use the depth image to check objects moving (the best)
-for i=1:film_length    
+%%
+for i=1:fl
     % subtract background
     imdiff=abs(imgsd(:,:,i)-bgdepth)>.20;
     % filter image, maybe another filter to get better objects?
     imgdiffiltered=imopen(imdiff,strel('disk',6));
-
-    % check with gradients between overlapping objects
+    
+    % GRADIENT HERE %
     [Gmag, ~] = imgradient(imgsd(:,:,i));
     lin_indexes = Gmag > 1;
+    %grad_filt = zeros(480,640);
+    %grad_filt(lin_indexes) = 1;
+    %figure(1)
+    %imshow(imgdiffiltered);
     imgdiffiltered(lin_indexes) = 0;
-    
+    %figure(2)
+    %imshowpair(imgdiffiltered, grad_filt, 'montage');    
     % label every object
     [L, num]=bwlabel(imgdiffiltered);
+    num
         
     % DEBUG
     imagesc(imgsd(:,:,i));
@@ -35,8 +51,8 @@ for i=1:film_length
         % check indexes for each label and compute 2d extremes
         [rows, columns] = find(L == j);
         pixel_list = [rows, columns];
-        % check if area is at least 3000 pixels
-        if length(pixel_list(:,1)) < 3000
+        % check if area is at least 3000 pixels ~5%
+        if length(pixel_list) < 3000
             continue
         end
         
@@ -51,17 +67,14 @@ for i=1:film_length
         
         %and add the pixel list!
         image_objects(i).object(p).pixel_list = pixel_list;
-        
-        %DEBUG
+        % DEBUG
         hold on
-        plot(image_objects(i).object(p).X, image_objects(i).object(p).Y)
+        plot( image_objects(i).object(p).X,  image_objects(i).object(p).Y)
         
         % next object
         p = p +1;
     end
-    %DEBUG
+    % DEBUG
     pause(0.1)
     hold off
-end
-
 end
