@@ -36,8 +36,8 @@ for i=1:film_length
         % check indexes for each label and compute 2d extremes
         [rows, columns] = find(L == j);
         pixel_list = [rows, columns];
-        % check if area is at least 1000 pixels
-        if length(pixel_list) < 1000
+        % check if area is at least 3000 pixels ~5%
+        if length(pixel_list) < 3000
             continue
         end        
         
