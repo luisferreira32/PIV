@@ -16,13 +16,14 @@ for i=1:film_length
     imdiff=abs(imgsd(:,:,i)-bgdepth)>.20;
     % filter image, maybe another filter to get better objects?
     imgdiffiltered=imopen(imdiff,strel('disk',6));
-    
-    % label every object
-    [L, num]=bwlabel(imgdiffiltered);
+
     % check with gradients between overlapping objects
     [Gmag, ~] = imgradient(imgsd(:,:,i));
     lin_indexes = Gmag > 1;
     imgdiffiltered(lin_indexes) = 0;
+    
+    % label every object
+    [L, num]=bwlabel(imgdiffiltered);
         
     % DEBUG
     imagesc(imgsd(:,:,i))
