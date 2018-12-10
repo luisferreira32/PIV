@@ -47,7 +47,8 @@ for i=1:(film_length-1)
             costs(i).table(n,m) = costs(i).table(n,m) + Cconst * cost_colour(image_pcs(i).object{n}, image_pcs(i+1).object{m});
         end
     end
-    costs(i).table
+    % DEBUG
+    %costs(i).table
       
     % Assign with greedy algorithm
     [index_object] = greedy(costs(i).table, length(image_objects(i).object),length(image_objects(i+1).object), treshold);

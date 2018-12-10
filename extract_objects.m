@@ -18,21 +18,18 @@ image_pcs(film_length) = struct();
 % use the depth image to check objects moving (the best)
 for i=1:film_length
     % subtract background
-    imdiff=abs(imgsd(:,:,i)-bgdepth)>.20;
+    imdiff=abs(imgsd(:,:,i)-bgdepth)>0.2;
     % filter image, maybe another filter to get better objects?
     imgdiffiltered=imopen(imdiff,strel('disk',6));
+        
+    % check with gradients between overlapping objects
+    [Gmag, ~] = imgradient(imgsd(:,:,i));
+    lin_indexes = Gmag > 1;
+    imgdiffiltered(lin_indexes) = 0;
     
     % label every object
     [L, num]=bwlabel(imgdiffiltered);
-        
-    % show results (to be commented)
-    %figure(4);
-    %imagesc(imgdiffiltered);
-    %colormap(gray);
-    %figure(5);
-    %imagesc(bwlabel(imgdiffiltered));
-    %pause(0.01);
-    
+            
     % then box it
     p = 1;
     for j = 1:num
@@ -40,9 +37,9 @@ for i=1:film_length
         [rows, columns] = find(L == j);
         pixel_list = [rows, columns];
         % check if area is at least 1000 pixels
-        if length(pixel_list(:,1)) < 1000
+        if length(pixel_list) < 1000
             continue
-        end
+        end        
         
         % compute point cloud and store it for further use
         pc = get_object_pc(pixel_list, imgsrt(:,:,:,i), imgsd(:,:,i), cam_params);
@@ -50,6 +47,9 @@ for i=1:film_length
         [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc);
         
         image_pcs(i).object{p} = pc;
+        % DEBUG
+        %showPointCloud(pc);
+        %pause(0.1)
         
         % set up the final object struct
         image_objects(i).object(p).X = [xmin, xmin, xmin, xmin, xmax, xmax, xmax, xmax];
@@ -57,7 +57,6 @@ for i=1:film_length
         image_objects(i).object(p).Z = [zmax, zmin, zmin, zmax, zmax, zmin, zmin, zmax];
         image_objects(i).object(p).frames_tracked = i;
         
-        %figure(1);showPointCloud(pc);
         % next object
         p = p +1;
     end
