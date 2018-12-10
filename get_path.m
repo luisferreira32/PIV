@@ -1,14 +1,19 @@
-function [objects] = get_path(film_length, image_objects, imgsrt)
+function [objects] = get_path(film_length, image_objects, imgsrt, imgsd)
 % to get the path we must choose the minimum (acceptable) cost between two
 % objects in two diferent pictures. cost function f = A*proximity + B*color
 
 % change this scalers to get better cost
-% proximity of vertices
 Pconst = 1;
 Vconst = 1;
 Cconst = 1;
-treshold = 10000;
+treshold = 1; % all costs are normalized, sum is 3
 
+% use proximity constant to normalize (vector from one edge to the other)
+maxnorm = norm([480, 640, max(max(max(imgsd)))]-[0,0,min(min(min(imgsd)))]);
+Pconst = Pconst*(1/maxnorm);
+% have max volume to normalize volumes
+maxvol = 480*640*(max(max(max(imgsd)))-min(min(min(imgsd))));
+Vconst = Vconst*(1/maxvol);
 
 % allocate memory before
 costs(film_length) = struct();
@@ -39,10 +44,11 @@ for i=1:(film_length-1)
             % proximity cost is distance:
             costs(i).table(n,m) = Pconst * cost_proximity(image_objects(i).object(n), image_objects(i+1).object(m));
             % we can have a volume cost
-            %costs(i).table(n,m) = costs(i).table(n,m); % + Vconst * cost_volume(pc1, pc2);
+            costs(i).table(n,m) = costs(i).table(n,m) + Vconst * cost_volume(image_objects(i).object(n), image_objects(i+1).object(m));
             
             % the colour cost should be done with hue and/or saturation
             costs(i).table(n,m) = costs(i).table(n,m) + Cconst * cost_colour(image_objects(i).object(n).pixel_list, image_objects(i+1).object(m).pixel_list, imgsrt(:,:,:,i));
+            
         end
     end
       

@@ -17,7 +17,7 @@ info = "done extracting"
 % connect boxes paths using proximity of boxes (and possible size)
 % then use colour from imgsrt, (lastly use features)
 
-objects = get_path(film_length, image_objects, imgsrt);
+objects = get_path(film_length, image_objects, imgsrt, imgsd);
 info = "done tracking"
 % test it graphically?
 
