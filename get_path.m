@@ -1,14 +1,16 @@
-function [objects] = get_path(film_length, image_objects, image_pcs)
+function [objects] = get_path(film_length, image_objects, image_pcs, maxvol, maxnorm)
 % to get the path we must choose the minimum (acceptable) cost between two
 % objects in two diferent pictures. cost function f = A*proximity + B*color
 
-% change this scalers to get better cost
-% proximity of vertices
+% change this scalers to get better cost (K <= 1)
 Pconst = 1;
 Vconst = 1;
 Cconst = 1;
-treshold = 10000;
+treshold = 1; %max cost is 3
 
+% and use them to normalize
+Pconst = Pconst*(1/maxnorm);
+Vconst = Vconst*(1/maxvol);
 
 % allocate memory before
 costs(film_length) = struct();
@@ -39,12 +41,13 @@ for i=1:(film_length-1)
             % proximity cost is distance:
             costs(i).table(n,m) = Pconst * cost_proximity(image_objects(i).object(n), image_objects(i+1).object(m));
             % we can have a volume cost
-            %costs(i).table(n,m) = costs(i).table(n,m); % + Vconst * cost_volume(pc1, pc2);
+            costs(i).table(n,m) = costs(i).table(n,m) + Vconst * cost_volume(image_objects(i).object(n), image_objects(i+1).object(m));
             
             % the colour cost should be done with hue and/or saturation
             costs(i).table(n,m) = costs(i).table(n,m) + Cconst * cost_colour(image_pcs(i).object{n}, image_pcs(i+1).object{m});
         end
     end
+    costs(i).table
       
     % Assign with greedy algorithm
     [index_object] = greedy(costs(i).table, length(image_objects(i).object),length(image_objects(i+1).object), treshold);
