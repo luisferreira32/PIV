@@ -17,8 +17,8 @@ for i = 1:length(d)
     imgseq1(i).depth = fullfile(dd(i).folder,dd(i).name);
 end
 %%
-objects = track3D_part1(imgseq1,cam_params);
 [fl, imgs, imdepth] = loader(imgseq1, cam_params);
+objects = track3D_part1(imgseq1,cam_params);
 
 Kd = cam_params.Kdepth;
 %%
@@ -35,9 +35,5 @@ for i = 1:length(objects)
         hold on
 		plot3(objects(i).X(k,:), objects(i).Y(k,:), objects(i).Z(k,:))
         pause(0.01);
-    end
-    % for now just show the first X objects
-    if i > 1
-        break;
     end
 end
