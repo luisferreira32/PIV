@@ -1,13 +1,11 @@
 clear;
-imgseq1_str = "datasets/um/images";
+dir_str = "datasets/bonecos/";
 load("cameraparametersAsus.mat")
 
 % do structs
-% load all the jpg and mat
-jpg = "*.jpg";
-mat = "*.mat";
-imgjpg = strcat(imgseq1_str, jpg);
-imgmat = strcat(imgseq1_str, mat);
+% load all the images and mat
+imgjpg = strcat(dir_str,'rgb_image1*.png');
+imgmat = strcat(dir_str, 'depth1*.mat');
 d=dir(imgjpg);
 dd=dir(imgmat);
 % pass it to a struct
@@ -29,6 +27,6 @@ for i = 1:length(objects)
         hold on
 		%plot3(objects(i).X(k,:), objects(i).Y(k,:), objects(i).Z(k,:))
 		plot(objects(i).X(k,:), objects(i).Y(k,:))
-        pause(0.01);
+        pause(0.1);
     end
 end
