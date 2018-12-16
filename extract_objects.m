@@ -18,7 +18,7 @@ image_pcs(film_length) = struct();
 % use the depth image to check objects moving (the best)
 for i=1:film_length
     % subtract background
-    imdiff=abs(imgsd(:,:,i)-bgdepth)>0.2;
+    imdiff=abs(imgsd(:,:,i)-bgdepth)>0.20;
     % filter image, maybe another filter to get better objects?
     imgdiffiltered=imopen(imdiff,strel('disk',6));
         
