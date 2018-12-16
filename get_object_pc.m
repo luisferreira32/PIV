@@ -1,11 +1,4 @@
-function [pc]=get_object_pc(pixel_list, imgrgb,imgdepth, cam_params)
-% Inputs: 
-% pixel_list- list of pixels that belong to the same object
-% imgrgb- rgb image obtained from the reconstruction 
-% imgdepth- depth image corresponding to the rgb image 
-%
-% Outputs:
-% pc - point cloud obtained from the depth and rgb image
+function [pc]=get_object_pc(pixel_list, imgrgb,imgdepth, R21, T21, cam_params)
 
 rgb_index=zeros(length(pixel_list),3);
 depth_index=zeros(length(pixel_list),1);
@@ -21,10 +14,13 @@ for i=1:length(pixel_list)
     depth_index(i)=imgdepth(pixel_list(i,1),pixel_list(i,2));
 end
 
+% compute xyz
 Z=double(depth_index(:)');
 u=pixel_list(:,2)';
 v=pixel_list(:,1)';
 P=inv(cam_params.Kdepth)*[Z.*u ;Z.*v;Z];
-pc=pointCloud(P','color',uint8(rgb_index));
+% rotate and translate, T21 horizontal
+xyz = (P')*R21 + repmat(T21, length(P'), 1);
+pc=pointCloud(xyz,'color',uint8(rgb_index));
 
 end
