@@ -30,8 +30,7 @@ end
 % imgsd depth images 
 
 function [fl, imgsrt, imgsd] = loader( imgseq1, cam_params)
-	%% 1. Get our pointclounds ready
-
+	
 	% Make use of the arguments
 
 	% empty images rgb, rgb R & T, depth
@@ -86,10 +85,6 @@ end
 
 function [image_objects, image_pcs] = extract_objects(film_length, imgsrt, imgsd, cam_params)
 
-	% create labels' arrays
-	imglabel = zeros(480, 640, film_length);
-	imgnum = zeros(film_length);
-
 	% find the background with median ON DEPTH
 	bgdepth=median(imgsd,3);
 
@@ -106,7 +101,7 @@ function [image_objects, image_pcs] = extract_objects(film_length, imgsrt, imgsd
 	        
 	    % check with gradients between overlapping objects
 	    [Gmag, ~] = imgradient(imgsd(:,:,i));
-	    lin_indexes = Gmag > 0.5;
+	    lin_indexes = Gmag > 1;
 	    imgdiffiltered(lin_indexes) = 0;
 	    
 	    % label every object
