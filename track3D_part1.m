@@ -30,7 +30,8 @@ end
 % imgsd depth images 
 
 function [fl, imgsrt, imgsd] = loader( imgseq1, cam_params)
-	
+	%% 1. Get our pointclounds ready
+
 	% Make use of the arguments
 
 	% empty images rgb, rgb R & T, depth
@@ -101,7 +102,7 @@ function [image_objects, image_pcs] = extract_objects(film_length, imgsrt, imgsd
 	        
 	    % check with gradients between overlapping objects
 	    [Gmag, ~] = imgradient(imgsd(:,:,i));
-	    lin_indexes = Gmag > 1;
+	    lin_indexes = Gmag > 0.5;
 	    imgdiffiltered(lin_indexes) = 0;
 	    
 	    % label every object
@@ -369,13 +370,14 @@ function [cost] = cost_colour(pc1, pc2)
     linind2 = find(hsv2(:,2)<.05);
     % the 50000 was random ~16%, img of size 480*640 =~ 300k
     if length(linind1) > 50000 || length(linind2) > 50000
+    	% use the saturation
         h1 = imhist(hsv1(:,2),256);
         h2 = imhist(hsv2(:,2),256);
         %normalize
         h1=h1/sum(h1);
         h2=h2/sum(h2);
     else
-        % maybe nullify the lower saturation hues?
+        % use the hue
         h1 = imhist(hsv1(:,1),256);
         h2 = imhist(hsv2(:,1),256);
         %normalize
