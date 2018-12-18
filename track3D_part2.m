@@ -13,7 +13,7 @@ function [objects, cam2toW] = track3D_part2( imgseq1, imgseq2,   cam_params)
 	%% 2. Now box objects moving
 	% gettin maximum volume and maximum norm to normalize the costs 0-1
 	[maxvol, maxnorm] = get_maxes(film_length, imgsd, cam_params);
-	[image_objects, image_pcs] = extract_objects(film_length, maxvol, maxnorm, imgsrt1, imgsrt2, imgsd1, imgsd2, R21, T21, cam_params);
+	[image_objects, image_pcs] = extract_objects(film_length, maxnorm, imgsrt1, imgsrt2, imgsd1, imgsd2, R21, T21, cam_params);
 	fprintf("done extracting\n");
 
 	%% 3. Identify which objects are the same, creating a path between boxes
