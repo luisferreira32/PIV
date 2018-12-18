@@ -1,4 +1,4 @@
-function [image_objects, image_pcs] = extract_objects(film_length, maxvol, maxnorm, imgsrt1, imgsrt2, imgsd1, imgsd2, R21, T21,cam_params)
+function [image_objects, image_pcs] = extract_objects(film_length, maxnorm, imgsrt1, imgsrt2, imgsd1, imgsd2, R21, T21,cam_params)
 
 
     % find the background with median ON DEPTH
