@@ -14,15 +14,15 @@ function [cost] = cost_colour(pc1, pc2)
         h1 = imhist(hsv1(:,2),256);
         h2 = imhist(hsv2(:,2),256);
         %normalize
-        h1=h1/size(hsv1,1)/size(hsv1,2);
-        h2=h2/size(hsv2,1)/size(hsv2,2);
+        h1=h1/sum(h1);
+        h2=h2/sum(h2);
     else
         % maybe nullify the lower saturation hues?
         h1 = imhist(hsv1(:,1),256);
         h2 = imhist(hsv2(:,1),256);
         %normalize
-        h1=h1/size(hsv1,1)/size(hsv1,2);
-        h2=h2/size(hsv2,1)/size(hsv2,2);
+        h1=h1/sum(h1);
+        h2=h2/sum(h2);
     end
 
     % returns a cost between 0 and 1?
