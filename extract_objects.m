@@ -107,13 +107,10 @@ function [image_objects, image_pcs] = extract_objects(film_length, maxvol, maxno
         % MATCH OBJECTS OF CAMERAS
         object_num = curr_objects;
         Pconst = 1;
-        Vconst = 1;
-        Cconst = 1;
-        treshold = 0.5; %max cost is 3
+        treshold = 0.1; %max cost is 1
 
         % and use them to normalize
         Pconst = Pconst*(1/maxnorm);
-        Vconst = Vconst*(1/maxvol);
 
         % compute a cost table between the two images
         costtable = ones(length(image_objects(i)),length(image_objects2(i)))*(treshold + 1);    
@@ -121,10 +118,6 @@ function [image_objects, image_pcs] = extract_objects(film_length, maxvol, maxno
             for m = 1:length(image_objects2(i).object)
                 % proximity cost is distance:
                 costtable(n,m) = Pconst * cost_proximity(image_objects(i).object(n), image_objects2(i).object(m));
-                % we can have a volume cost
-                costtable(n,m) = costtable(n,m) + Vconst * cost_volume(image_objects(i).object(n), image_objects2(i).object(m));
-                % the colour cost should be done with hue and/or saturation
-                costtable(n,m) = costtable(n,m) + Cconst * cost_colour(image_pcs(i).object{n}, image_pcs2(i).object{m});
             end
         end
         % get correspondence of the second in the first
