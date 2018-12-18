@@ -120,16 +120,26 @@ function [image_objects, image_pcs] = extract_objects(film_length, maxnorm, imgs
                 costtable(n,m) = Pconst * cost_proximity(image_objects(i).object(n), image_objects2(i).object(m));
             end
         end
-        % get correspondence of the second in the first
+        % get correspondence of the second camera to the first camera
         [index_object] = greedy(costtable, length(image_objects(i).object), length(image_objects2(i).object), treshold);
 
         % add objects of camera two that are non existant in camera one
         for m = 1:length(image_objects2(i).object)
-            % there was a match, keep the old object
+            % if there wasn't a match, it's an object only on camera 2
             if index_object(m) < 0
                 image_objects(i).object(object_num) = image_objects2(i).object(m);
                 image_pcs(i).object{object_num} = image_pcs2(i).object{m};
                 object_num = object_num + 1;
+            % if there was, join both informations
+            else
+                % merge with 5cm precision
+                pc_merged = pcmerge(image_pcs(i).object{index_object(m)}, image_pcs2(i).object{m}, 0.05);
+                image_pcs(i).object{index_object(m)} = pc_merged;
+                [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc_merged);
+                % change the box, the frame is the same
+                image_objects(i).object(object_num).X = [xmin, xmin, xmin, xmin, xmax, xmax, xmax, xmax];
+                image_objects(i).object(object_num).Y = [ymax, ymax, ymin, ymin, ymax, ymax, ymin, ymin];
+                image_objects(i).object(object_num).Z = [zmax, zmin, zmin, zmax, zmax, zmin, zmin, zmax];
             end
         end
 
