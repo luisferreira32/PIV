@@ -26,8 +26,9 @@ end
 [objects, cam2toW] = track3D_part2(imgseq1,imgseq2,cam_params);
 %%
 [~, imgsrt1, imgsd1]=loader(imgseq1, cam_params);
-[film_length, imgsrt2, imgsd2]=loader(imgseq2, cam_params);
+%[film_length, imgsrt2, imgsd2]=loader(imgseq2, cam_params);
 Kd = cam_params.Kdepth;
+%%
 for i = 1:length(objects)
     figure(i)
     for  k = 1:length(objects(i).frames_tracked)
@@ -39,7 +40,7 @@ for i = 1:length(objects)
         pc=pointCloud(P', 'color',uint8(reshape(imgsrt1(:,:,:,objects(i).frames_tracked(k)), [480*640, 3])));
         showPointCloud(pc);
         hold on
-        plot3(objects(i).X(k,:), objects(i).Y(k,:), objects(i).Z(k,:))
+        plot3(objects(i).X(k,:), objects(i).Y(k,:), objects(i).Z(k,:),'red','LineWidth',2)
         pause(0.1);
     end
 end

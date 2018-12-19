@@ -52,7 +52,7 @@ for i=1:length(img_index)
     I2=single(rgb2gray(uint8(rgbd2(:,:,:,i))));
     [f1,d1_]=vl_sift(I1);
     [f2,d2_]=vl_sift(I2);
-    [matches, scores] = vl_ubcmatch(d1_, d2_);
+    [matches, scores] = vl_ubcmatch(d1_, d2_, 3);
     y1=round(f1(2,matches(1,:)));
     x1=round(f1(1,matches(1,:)));
     y2=round(f2(2,matches(2,:)));
@@ -77,20 +77,18 @@ espera=1;
 for i=1:n_it-3
     % Choose random points, we need at least 4 points for the procrustes
     rand_points=n_points(4*i:4*i+3);
-    %ind1=sub2ind(size(dp2),round(f1(2,rand_points(1,:))),round(f1(1,rand_points(1,:))));
-    %ind2=sub2ind(size(dp2),round(f2(2,rand_points(2,:))),round(f2(1,rand_points(2,:))));
     % Get 3D points correspondent to theses indexes
    
     X1=P1(rand_points,:);
     X2=P2(rand_points,:);
     
     % Compute procrustes
-    [~, ~, transform]=procrustes(X1,X2);
+    [~, ~, transform]=procrustes(X1,X2, 'scaling', false, 'reflection', false);
     
     % Compute points from image 2 projected to image 1 using the
     % transformation from procrustes
     
-    xyz21= transform.b * P2 * transform.T + repmat(transform.c(1,:),length(P2),1);
+    xyz21= P2 * transform.T + repmat(transform.c(1,:),length(P2),1);
     error=sqrt(sum((P1-xyz21).^2,2)); % Compute the error for all points
     
     inds(i).in=find(error<threshold);
@@ -110,6 +108,7 @@ end
 [~, ind]=max(num_in);
 xyz1f=P1(inds(ind).in,:);
 xyz2f=P2(inds(ind).in,:);
-[d, ~, transform]=procrustes(xyz1f, xyz2f);
+[d, ~, transform]=procrustes(xyz1f, xyz2f,'scaling', false, 'reflection', false);
 R=transform.T;
 T=transform.c(1,:);
+

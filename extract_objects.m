@@ -1,4 +1,4 @@
-function [image_objects, image_pcs] = extract_objects(film_length, maxnorm, imgsrt1, imgsrt2, imgsd1, imgsd2, R21, T21,cam_params)
+function [image_objects, image_pcs] = extract_objects(film_length, imgsrt1, imgsrt2, imgsd1, imgsd2, R21, T21,cam_params)
 
 
     % find the background with median ON DEPTH
@@ -107,10 +107,7 @@ function [image_objects, image_pcs] = extract_objects(film_length, maxnorm, imgs
         % MATCH OBJECTS OF CAMERAS
         object_num = curr_objects;
         Pconst = 1;
-        treshold = 0.1; %max cost is 1
-
-        % and use them to normalize
-        Pconst = Pconst*(1/maxnorm);
+        treshold = 0.80; %in meters
 
         % compute a cost table between the two images
         costtable = ones(length(image_objects(i)),length(image_objects2(i)))*(treshold + 1);    

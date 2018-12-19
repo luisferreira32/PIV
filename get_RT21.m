@@ -33,7 +33,7 @@ function [R21, T21] = get_RT21(film_length, imgsrt1, imgsrt2, imgd1, imgd2, cam_
         I2=single(rgb2gray(uint8(rgbd2(:,:,:,i))));
         [f1,d1_]=vl_sift(I1);
         [f2,d2_]=vl_sift(I2);
-        [matches, ~] = vl_ubcmatch(d1_, d2_);
+        [matches, ~] = vl_ubcmatch(d1_, d2_, 3);
         y1=round(f1(2,matches(1,:)));
         x1=round(f1(1,matches(1,:)));
         y2=round(f2(2,matches(2,:)));
@@ -63,12 +63,12 @@ function [R21, T21] = get_RT21(film_length, imgsrt1, imgsrt2, imgd1, imgd2, cam_
         X2=P2(rand_points,:);
 
         % Compute procrustes
-        [~, ~, transform]=procrustes(X1,X2);
+        [~, ~, transform]=procrustes(X1,X2, 'scaling', false, 'reflection', false);
 
         % Compute points from image 2 projected to image 1 using the
         % transformation from procrustes
 
-        xyz21= transform.b * P2 * transform.T + repmat(transform.c(1,:),length(P2),1);
+        xyz21= P2 * transform.T + repmat(transform.c(1,:),length(P2),1);
         error=sqrt(sum((P1-xyz21).^2,2)); % Compute the error for all points
 
         inds(i).in=find(error<threshold);
@@ -83,7 +83,7 @@ function [R21, T21] = get_RT21(film_length, imgsrt1, imgsrt2, imgd1, imgd2, cam_
     [~, ind]=max(num_in);
     xyz1f=P1(inds(ind).in,:);
     xyz2f=P2(inds(ind).in,:);
-    [~, ~, transform]=procrustes(xyz1f, xyz2f);
+    [~, ~, transform]=procrustes(xyz1f, xyz2f, 'scaling', false, 'reflection', false);
     R21=transform.T;
     T21=transform.c(1,:);
 
