@@ -8,7 +8,7 @@ function [fl, imgsrt, imgsd] = loader( imgseq, cam_params)
 
     % film length
     fl = length(imgseq);
-
+    
     % Load information and compute digital RGB camera
     for i=1:length(imgseq)
         d=dir(imgseq(i).rgb);
@@ -37,7 +37,6 @@ function [fl, imgsrt, imgsd] = loader( imgseq, cam_params)
         
         % finally save our depth array for further use
         imgsd(:,:,i)=double(depth_array)/1000;
-        
     end
 
 end

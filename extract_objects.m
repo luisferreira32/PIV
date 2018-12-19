@@ -134,7 +134,7 @@ function [image_objects, image_pcs] = extract_objects(film_length, maxnorm, imgs
             else
                 % merge with 5cm precision
                 pc_merged = pcmerge(image_pcs(i).object{index_object(m)}, image_pcs2(i).object{m}, 0.05);
-                image_pcs(i).object{index_object(m)} = pc_merged;
+                image_pcs(i).object{object_num} = pc_merged;
                 [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc_merged);
                 % change the box, the frame is the same
                 image_objects(i).object(object_num).X = [xmin, xmin, xmin, xmin, xmax, xmax, xmax, xmax];

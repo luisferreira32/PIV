@@ -1,17 +1,17 @@
 clear;
-dir_str = "datasets/um/";
+dir_str = "datasets/bonecos/";
 load("cameraparametersAsus.mat")
 
 % do structs
 % load all the images and mat
 imgjpg1 = strcat(dir_str,'rgb_image1*.png');
 imgmat1 = strcat(dir_str, 'depth1*.mat');
-d1=dir(imgjpg);
-dd1=dir(imgmat);
+d1=dir(imgjpg1);
+dd1=dir(imgmat1);
 imgjpg2 = strcat(dir_str,'rgb_image2*.png');
 imgmat2 = strcat(dir_str, 'depth2*.mat');
-d2=dir(imgjpg);
-dd2=dir(imgmat);
+d2=dir(imgjpg2);
+dd2=dir(imgmat2);
 % pass it to a struct
 imgseq1(length(d1)) = struct();
 imgseq2(length(d1)) = struct();
@@ -25,7 +25,7 @@ end
 %%
 [objects, cam2toW] = track3D_part2(imgseq1,imgseq2,cam_params);
 %%
-[film_length, imgsrt1, imgsd1]=loader(imgseq1, cam_params);
+[~, imgsrt1, imgsd1]=loader(imgseq1, cam_params);
 [film_length, imgsrt2, imgsd2]=loader(imgseq2, cam_params);
 Kd = cam_params.Kdepth;
 for i = 1:length(objects)
