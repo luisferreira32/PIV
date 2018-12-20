@@ -1,7 +1,8 @@
-%% Load data
+% Load data
 clear;
 dir_str = "datasets/bonecos/";
 load("cameraparametersAsus.mat")
+%run('~/Documents/MATLAB/vlfeat-0.9.21/toolbox/vl_setup');
 
 % do structs
 % load all the images and mat
@@ -13,8 +14,9 @@ imgjpg2 = strcat(dir_str,'rgb_image2*.png');
 imgmat2 = strcat(dir_str, 'depth2*.mat');
 d2=dir(imgjpg2);
 dd2=dir(imgmat2);
+
 %% Images selected
-samples=fix(0.10*length(d1));
+samples=fix(0.20*length(d1));
 img_index=fix(rand(samples,1)*length(d1))+1;
 
 for i=1:length(img_index)
@@ -52,12 +54,12 @@ for i=1:length(img_index)
     I2=single(rgb2gray(uint8(rgbd2(:,:,:,i))));
     [f1,d1_]=vl_sift(I1);
     [f2,d2_]=vl_sift(I2);
-    [matches, scores] = vl_ubcmatch(d1_, d2_, 3);
+    [matches, scores] = vl_ubcmatch(d1_, d2_, 0.5);
     y1=round(f1(2,matches(1,:)));
     x1=round(f1(1,matches(1,:)));
     y2=round(f2(2,matches(2,:)));
     x2=round(f2(1,matches(2,:)));
-    ind1=sub2ind(size(dp2(:,:,i)),y1,x1);
+    ind1=sub2ind(size(dp1(:,:,i)),y1,x1);
     ind2=sub2ind(size(dp2(:,:,i)),y2,x2);
     p1=xyz1(ind1,:,i);
     p2=xyz2(ind2,:,i);
@@ -65,9 +67,34 @@ for i=1:length(img_index)
     P2=[P2; p2];
 end
 
+%% Fabricated data to test ransac
+% [s,~, d]= svd(magic(3));
+% Rfab = s*d;
+% if det(Rfab) < 0
+%     Rfab = Rfab.*(-1);
+% end
+% Tfab = [1 0 1];
+% xyz2fab1 = xyz1(:,:,1)*Rfab + repmat(Tfab, length(xyz1(:,:,1)), 1);
+% 
+% %choose "features" matches
+% P1=[];
+% P2=[];
+% for i=1:(fix(length(xyz2fab1)/1000))
+%     random_index = fix(i*1000*rand())+1;
+%     P1 = [P1; xyz1(random_index,:,1)];
+%     P2 = [P2; xyz2fab1(random_index,:)];
+% end
+% 
+% % add noise of cm to 50%
+% for i = 1:(fix(length(P1)*0.5))
+%     random_index = fix((i*2*rand()))+1;
+%     P1(random_index,3) = P1(random_index,3) + rand()*0.2;
+%     P2(random_index,3) = P2(random_index,3) + rand()*0.2;
+% end
+
 %% Ransac
 n_it=1000; % ??
-threshold=0.1;
+threshold=0.01;
 num_in=[];
 trans=[];
 % Generate random numbers
@@ -108,7 +135,24 @@ end
 [~, ind]=max(num_in);
 xyz1f=P1(inds(ind).in,:);
 xyz2f=P2(inds(ind).in,:);
-[d, ~, transform]=procrustes(xyz1f, xyz2f,'scaling', false, 'reflection', false);
-R=transform.T;
-T=transform.c(1,:);
+[~, ~, transform]=procrustes(xyz1f, xyz2f,'scaling', false, 'reflection', false);
+R=transform.T';
+T=transform.c(1,:)';
+
+%% Test it
+pc1 = pointCloud(xyz1(:,:,1), 'color', reshape(uint8(rgbd1(:,:,:,1)), [640*480, 3]));
+ figure(1);showPointCloud(pc1);
+% pc2 = pointCloud(xyz2(:,:,1), 'color', reshape(uint8(rgbd2(:,:,:,1)), [640*480, 3]));
+% figure(2);showPointCloud(pc2);
+xyz2rt1 = xyz2(:,:,1)*R' + repmat(T', length(xyz2(:,:,1)), 1);
+pc3 = pointCloud(xyz2rt1, 'color', reshape(uint8(rgbd1(:,:,:,1)), [640*480, 3]));
+ figure(3);showPointCloud(pc3);
+pc_merged = pcmerge(pc1,pc3,0.01);
+figure(4);showPointCloud(pc_merged);
+
+% test fabricated data
+% xyz2fab1rt = xyz2fab1*R' + repmat(T', length(xyz2fab1),1);
+% pc4 = pointCloud(xyz2fab1rt, 'color', reshape(uint8(rgbd1(:,:,:,1)), [640*480, 3]));
+% figure();showPointCloud(pcmerge(pc1,pc4, 0.001));
+
 
