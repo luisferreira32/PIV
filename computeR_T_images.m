@@ -1,6 +1,6 @@
 % Load data
 clear;
-dir_str = "datasets/bonecos/";
+dir_str = "datasets/fruta1/";
 load("cameraparametersAsus.mat")
 %run('~/Documents/MATLAB/vlfeat-0.9.21/toolbox/vl_setup');
 
@@ -54,24 +54,37 @@ for i=1:length(img_index)
     I2=single(rgb2gray(uint8(rgbd2(:,:,:,i))));
     [f1,d1_]=vl_sift(I1);
     [f2,d2_]=vl_sift(I2);
-    [matches, scores] = vl_ubcmatch(d1_, d2_, 0.5);
+    
+%     figure(1);
+%     imagesc(rgbd1(:,:,:,i));hold on;plot(f1(1,:),f1(2,:),'*');hold off;
+%     figure(2);
+%     imagesc(rgbd2(:,:,:,i));hold on;plot(f2(1,:),f2(2,:),'*');hold off;
+
+    [matches, scores] = vl_ubcmatch(d1_, d2_, 3);
     xy1=f1(1:2,matches(1,:));
     xy2=f2(1:2,matches(2,:));
     
+    % get indexes of rgb equivalent on depth
     iaux1=cam_params.Krgb*xyz1(:,:,i)';
-    iaux2=[cam_params.Krgb]*[cam_params.R, cam_params.T]*[xyz2(:,:,i)' ; ones(1, length(xyz2(:,:,i)))];
+    iaux2=cam_params.Krgb*xyz2(:,:,i)';
     ind1=[iaux1(1,:)./iaux1(3,:); iaux1(2,:)./iaux1(3,:)];
     ind2=[iaux2(1,:)./iaux2(3,:); iaux2(2,:)./iaux1(3,:)];
-    
-    for j = 1:length(xy1)
-        [~,bestxy1(j)]=min(sqrt(sum(abs( ind1 - repmat( xy1(:,i),1,length(ind1) ) ).^2)));
-        [~,bestxy2(j)]=min(sqrt(sum(abs( ind2 - repmat( xy2(:,i),1,length(ind2) ) ).^2)));
+    % and pass to linear indexes the matches through minimum between rgb
+    % index and match index.
+    for j = 1:size(xy1,2)
+        [~,bestxy1(j)]=min(sqrt(sum(abs( ind1 - repmat( xy1(:,j),1,length(ind1) ) ).^2,1)));
+        [~,bestxy2(j)]=min(sqrt(sum(abs( ind2 - repmat( xy2(:,j),1,length(ind2) ) ).^2,1)));
     end
+
+%     % the "old" way
+%     ind1=sub2ind([480 640],round(xy1(2,:)),round(xy1(1,:)));
+%     ind2=sub2ind([480 640],round(xy2(2,:)),round(xy2(1,:)));
     
     p1=xyz1(bestxy1,:,i);
     p2=xyz2(bestxy2,:,i);
     P1=[P1; p1];
     P2=[P2; p2];
+    
     waitbar(espera/length(img_index));
     espera = espera +1 ;
 end
