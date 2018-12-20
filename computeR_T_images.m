@@ -34,37 +34,46 @@ end
 [v, u]=ind2sub([480 640],(1:480*640));
 for i=1:length(img_index)
     % cam 1
-    Z = dp1(:,:,i);
-    Z = Z(:)';
-    P=inv(cam_params.Kdepth)*[Z.*u ;Z.*v;Z];
-    xyz1(:,:,i) = P';
+    Z1 = dp1(:,:,i);
+    Z1 = Z1(:)';
+    P1=inv(cam_params.Kdepth)*[Z1.*u ;Z1.*v;Z1];
+    xyz1(:,:,i) = P1';
     % cam 2
-    Z = dp2(:,:,i);
-    Z = Z(:)';
-    P=inv(cam_params.Kdepth)*[Z.*u ;Z.*v;Z];
-    xyz2(:,:,i) = P';
+    Z2 = dp2(:,:,i);
+    Z2 = Z2(:)';
+    P2=inv(cam_params.Kdepth)*[Z2.*u ;Z2.*v;Z2];
+    xyz2(:,:,i) = P2';
 end
 
 %% Perform SIFT for all images 
 P1=[];
 P2=[];
-
+espera=1;
 for i=1:length(img_index)
     I1=single(rgb2gray(uint8(rgbd1(:,:,:,i))));
     I2=single(rgb2gray(uint8(rgbd2(:,:,:,i))));
     [f1,d1_]=vl_sift(I1);
     [f2,d2_]=vl_sift(I2);
     [matches, scores] = vl_ubcmatch(d1_, d2_, 0.5);
-    y1=round(f1(2,matches(1,:)));
-    x1=round(f1(1,matches(1,:)));
-    y2=round(f2(2,matches(2,:)));
-    x2=round(f2(1,matches(2,:)));
-    ind1=sub2ind(size(dp1(:,:,i)),y1,x1);
-    ind2=sub2ind(size(dp2(:,:,i)),y2,x2);
-    p1=xyz1(ind1,:,i);
-    p2=xyz2(ind2,:,i);
+    xy1=f1(1:2,matches(1,:));
+    xy2=f2(1:2,matches(2,:));
+    
+    iaux1=cam_params.Krgb*xyz1(:,:,i)';
+    iaux2=[cam_params.Krgb]*[cam_params.R, cam_params.T]*[xyz2(:,:,i)' ; ones(1, length(xyz2(:,:,i)))];
+    ind1=[iaux1(1,:)./iaux1(3,:); iaux1(2,:)./iaux1(3,:)];
+    ind2=[iaux2(1,:)./iaux2(3,:); iaux2(2,:)./iaux1(3,:)];
+    
+    for j = 1:length(xy1)
+        [~,bestxy1(j)]=min(sqrt(sum(abs( ind1 - repmat( xy1(:,i),1,length(ind1) ) ).^2)));
+        [~,bestxy2(j)]=min(sqrt(sum(abs( ind2 - repmat( xy2(:,i),1,length(ind2) ) ).^2)));
+    end
+    
+    p1=xyz1(bestxy1,:,i);
+    p2=xyz2(bestxy2,:,i);
     P1=[P1; p1];
     P2=[P2; p2];
+    waitbar(espera/length(img_index));
+    espera = espera +1 ;
 end
 
 %% Fabricated data to test ransac
@@ -145,7 +154,7 @@ pc1 = pointCloud(xyz1(:,:,1), 'color', reshape(uint8(rgbd1(:,:,:,1)), [640*480, 
 % pc2 = pointCloud(xyz2(:,:,1), 'color', reshape(uint8(rgbd2(:,:,:,1)), [640*480, 3]));
 % figure(2);showPointCloud(pc2);
 xyz2rt1 = xyz2(:,:,1)*R' + repmat(T', length(xyz2(:,:,1)), 1);
-pc3 = pointCloud(xyz2rt1, 'color', reshape(uint8(rgbd1(:,:,:,1)), [640*480, 3]));
+pc3 = pointCloud(xyz2rt1, 'color', reshape(uint8(rgbd2(:,:,:,1)), [640*480, 3]));
  figure(3);showPointCloud(pc3);
 pc_merged = pcmerge(pc1,pc3,0.01);
 figure(4);showPointCloud(pc_merged);
