@@ -9,6 +9,7 @@ function [objects, cam2toW] = track3D_part2( imgseq1, imgseq2,   cam_params)
 	[R21, T21] = get_RT21(film_length, imgsrt1, imgsrt2, imgsd1, imgsd2, cam_params);
 	cam2toW.R = R21;
 	cam2toW.T = T21;
+    fprintf("done RT\n");
 
 	%% 2. Now box objects moving
 	[image_objects, image_pcs] = extract_objects(film_length, imgsrt1, imgsrt2, imgsd1, imgsd2, R21, T21, cam_params);
@@ -87,8 +88,8 @@ function [R21, T21] = get_RT21(film_length, imgsrt1, imgsrt2, imgd1, imgd2, cam_
     for i=1:length(img_index)
         dp1(:,:,i)=imgd1(:,:,img_index(i));
         dp2(:,:,i)=imgd2(:,:,img_index(i));
-        rgbd1(:,:,:,i)=imgsrt1(:,:,:,i);
-        rgbd2(:,:,:,i)=imgsrt2(:,:,:,i);        
+        rgbd1(:,:,:,i)=imgsrt1(:,:,:,img_index(i));
+        rgbd2(:,:,:,i)=imgsrt2(:,:,:,img_index(i));        
     end
     
 	%% Compute 3d in camera frame
@@ -123,13 +124,15 @@ function [R21, T21] = get_RT21(film_length, imgsrt1, imgsrt2, imgd1, imgd2, cam_
         ind2=sub2ind(size(dp2(:,:,i)),y2,x2);
         p1=xyz1(ind1,:,i);
         p2=xyz2(ind2,:,i);
+        final_inds=find((p1(:,3).*p2(:,3))>0);
+        p1=p1(final_inds,:);p2=p2(final_inds,:);
         P1=[P1; p1];
         P2=[P2; p2];
     end
     
     %% Ransac
     n_it=1000;
-    threshold=0.01;
+    threshold=0.4;
     num_in=[];
     trans=[];
     % Generate random numbers
@@ -149,7 +152,7 @@ function [R21, T21] = get_RT21(film_length, imgsrt1, imgsrt2, imgd1, imgd2, cam_
         % Compute points from image 2 projected to image 1 using the
         % transformation from procrustes
 
-        xyz21= P2 * transform.T + repmat(transform.c(1,:),length(P2),1);
+        xyz21= P2 * transform.T + + ones(length(P2),1)*transform.c(1,:);
         error=sqrt(sum((P1-xyz21).^2,2)); % Compute the error for all points
 
         inds(i).in=find(error<threshold);
@@ -161,13 +164,12 @@ function [R21, T21] = get_RT21(film_length, imgsrt1, imgsrt2, imgd1, imgd2, cam_
         trans=[trans transform];
     end
     
-    % include all inliers to calculate last rigid body transform
     [~, ind]=max(num_in);
     xyz1f=P1(inds(ind).in,:);
     xyz2f=P2(inds(ind).in,:);
     [~, ~, transform]=procrustes(xyz1f, xyz2f, 'scaling', false, 'reflection', false);
-    R21=transform.T';
-    T21=transform.c(1,:)';
+    R21=transform.T;
+    T21=transform.c(1,:);
 
 end
 
@@ -219,7 +221,7 @@ function [image_objects, image_pcs] = extract_objects(film_length, imgsrt1, imgs
             
             % compute point cloud and store it for further use
             R11 = [1,0,0; 0,1,0; 0,0,1];
-            T11 = [0; 0; 0];
+            T11 = [0 0 0];
             pc = get_object_pc(pixel_list, imgsrt1(:,:,:,i), imgsd1(:,:,i), R11, T11, cam_params);
             % get values from point cloud
             [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc);
@@ -285,7 +287,7 @@ function [image_objects, image_pcs] = extract_objects(film_length, imgsrt1, imgs
         % MATCH OBJECTS OF CAMERAS
         object_num = curr_objects;
         Pconst = 1;
-        treshold = 0.25; %in meters
+        treshold = 0.80; %in meters
 
         % compute a cost table between the two images
         costtable = ones(length(image_objects(i)),length(image_objects2(i)))*(treshold + 1);    
@@ -307,8 +309,8 @@ function [image_objects, image_pcs] = extract_objects(film_length, imgsrt1, imgs
                 object_num = object_num + 1;
             % if there was, join both informations
             else
-                % merge with precision
-                pc_merged = pcmerge(image_pcs(i).object{index_object(m)}, image_pcs2(i).object{m}, 0.001);
+                % merge with 2cm precision
+                pc_merged = pcmerge(image_pcs(i).object{index_object(m)}, image_pcs2(i).object{m}, 0.02);
                 image_pcs(i).object{object_num} = pc_merged;
                 [xmin, xmax, ymin, ymax, zmin, zmax]=getboundingbox(pc_merged);
                 % change the box, the frame is the same
@@ -351,7 +353,7 @@ function [pc]=get_object_pc(pixel_list, imgrgb,imgdepth, R21, T21, cam_params)
 	v=pixel_list(:,1)';
 	P=inv(cam_params.Kdepth)*[Z.*u ;Z.*v;Z];
 	% rotate and translate, T21 horizontal
-	xyz = (P')*R21' + repmat(T21', length(P'), 1);
+	xyz = (P')*R21 + repmat(T21, length(P'), 1);
 	pc=pointCloud(xyz,'color',uint8(rgb_index));
 
 end
